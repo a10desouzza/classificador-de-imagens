@@ -1,0 +1,16 @@
+DEPTH = 784;
+WIDTH = 16;
+ADDRESS_RADIX = UNS;
+DATA_RADIX = HEX;
+
+CONTENT BEGIN
+    -- Preenche todos os 784 pixels com 0000 (Fundo preto)
+    [0..783]   : 0000;  
+
+    -- Desenha um bloco "branco" no centro da imagem 28x28 para teste
+    [346..354] : 0FFF;
+    [374..382] : 0FFF;
+    [402..410] : 0FFF;
+    [430..438] : 0FFF;
+    [458..466] : 0FFF;
+END;
