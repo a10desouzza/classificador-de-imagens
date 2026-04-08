@@ -1,27 +1,15 @@
-module Mac (
-    input wire clk,
-    input wire reset_n,
-    input wire clr,
-    input wire en,
-    input wire signed [15:0] in_a,
-    input wire signed [15:0] in_b,
-    output reg signed [31:0] acc_out
+module Mac #(
+    parameter integer DATA_W = 16,
+    parameter integer ACC_W  = 32,
+    parameter integer Q_FRAC = 12
+)(
+    input  wire signed [DATA_W-1:0] a,
+    input  wire signed [DATA_W-1:0] b,
+    output wire signed [ACC_W-1:0]  product_full,
+    output wire signed [ACC_W-1:0]  product_scaled
 );
 
-    wire signed [31:0] mult_val;
-    wire signed [31:0] mult_shifted;
-
-    assign mult_val     = $signed(in_a) * $signed(in_b);
-    assign mult_shifted = { {12{mult_val[31]}}, mult_val[31:12] };
-
-    always @(posedge clk or negedge reset_n) begin
-        if (!reset_n) begin
-            acc_out <= 32'sd0;
-        end else if (clr) begin
-            acc_out <= 32'sd0;
-        end else if (en) begin
-            acc_out <= acc_out + mult_shifted;
-        end
-    end
+    assign product_full   = $signed(a) * $signed(b);
+    assign product_scaled = product_full >>> Q_FRAC;
 
 endmodule

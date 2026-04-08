@@ -1,6 +1,25 @@
 
-State Machine - |elm_accel|Control_unit:u_control|estado_atual
-Name estado_atual.DONE estado_atual.ERROR estado_atual.BUSY 
-estado_atual.DONE 0 0 0 
-estado_atual.BUSY 1 0 1 
-estado_atual.ERROR 1 1 0 
+State Machine - |top|elm_accel:u_elm_accel|opcode
+Name opcode.CMD_STORE_B opcode.CMD_STORE_W opcode.CMD_STORE_IMG opcode.CMD_CLEAR_ERR opcode.CMD_START 
+opcode.CMD_CLEAR_ERR 0 0 0 0 0 
+opcode.CMD_STORE_IMG 0 0 1 1 0 
+opcode.CMD_STORE_W 0 1 0 1 0 
+opcode.CMD_STORE_B 1 0 0 1 0 
+opcode.CMD_START 0 0 0 1 1 
+
+State Machine - |top|elm_accel:u_elm_accel|phase
+Name phase.PH_ARGMAX phase.PH_O_MAC phase.PH_O_WAIT1 phase.PH_O_WAIT0 phase.PH_O_ADDR phase.PH_H_TANH_LATCH phase.PH_H_TANH phase.PH_H_BIAS_WAIT1 phase.PH_H_BIAS_WAIT0 phase.PH_H_BIAS phase.PH_H_MAC phase.PH_H_WAIT1 phase.PH_H_WAIT0 phase.PH_H_ADDR 
+phase.PH_H_ADDR 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+phase.PH_H_WAIT0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 
+phase.PH_H_WAIT1 0 0 0 0 0 0 0 0 0 0 0 1 0 1 
+phase.PH_H_MAC 0 0 0 0 0 0 0 0 0 0 1 0 0 1 
+phase.PH_H_BIAS 0 0 0 0 0 0 0 0 0 1 0 0 0 1 
+phase.PH_H_BIAS_WAIT0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 
+phase.PH_H_BIAS_WAIT1 0 0 0 0 0 0 0 1 0 0 0 0 0 1 
+phase.PH_H_TANH 0 0 0 0 0 0 1 0 0 0 0 0 0 1 
+phase.PH_H_TANH_LATCH 0 0 0 0 0 1 0 0 0 0 0 0 0 1 
+phase.PH_O_ADDR 0 0 0 0 1 0 0 0 0 0 0 0 0 1 
+phase.PH_O_WAIT0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 
+phase.PH_O_WAIT1 0 0 1 0 0 0 0 0 0 0 0 0 0 1 
+phase.PH_O_MAC 0 1 0 0 0 0 0 0 0 0 0 0 0 1 
+phase.PH_ARGMAX 1 0 0 0 0 0 0 0 0 0 0 0 0 1 
