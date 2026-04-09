@@ -1,5 +1,5 @@
 Analysis & Synthesis report for pbl
-Wed Apr  8 20:49:03 2026
+Wed Apr  8 21:07:44 2026
 Quartus Prime Version 25.1std.0 Build 1129 10/21/2025 SC Lite Edition
 
 
@@ -71,7 +71,7 @@ on the Quartus Prime software download page.
 +-----------------------------------------------------------------------------------+
 ; Analysis & Synthesis Summary                                                      ;
 +---------------------------------+-------------------------------------------------+
-; Analysis & Synthesis Status     ; Successful - Wed Apr  8 20:49:03 2026           ;
+; Analysis & Synthesis Status     ; Successful - Wed Apr  8 21:07:44 2026           ;
 ; Quartus Prime Version           ; 25.1std.0 Build 1129 10/21/2025 SC Lite Edition ;
 ; Revision Name                   ; pbl                                             ;
 ; Top-level Entity Name           ; top                                             ;
@@ -191,9 +191,9 @@ on the Quartus Prime software download page.
 ;                            ;             ;
 ; Usage by Processor         ; % Time Used ;
 ;     Processor 1            ; 100.0%      ;
-;     Processor 2            ;  16.3%      ;
-;     Processor 3            ;  11.2%      ;
-;     Processor 4            ;   5.0%      ;
+;     Processor 2            ;  16.1%      ;
+;     Processor 3            ;  11.5%      ;
+;     Processor 4            ;   5.7%      ;
 ;     Processor 5            ;   0.0%      ;
 ;     Processor 6            ;   0.0%      ;
 +----------------------------+-------------+
@@ -1250,7 +1250,7 @@ Note: In order to hide this table in the UI and the text report file, please set
 +----------------+--------------+
 ; Partition Name ; Elapsed Time ;
 +----------------+--------------+
-; Top            ; 00:00:10     ;
+; Top            ; 00:00:09     ;
 +----------------+--------------+
 
 
@@ -1260,7 +1260,7 @@ Note: In order to hide this table in the UI and the text report file, please set
 Info: *******************************************************************
 Info: Running Quartus Prime Analysis & Synthesis
     Info: Version 25.1std.0 Build 1129 10/21/2025 SC Lite Edition
-    Info: Processing started: Wed Apr  8 20:48:30 2026
+    Info: Processing started: Wed Apr  8 21:07:14 2026
 Info: Command: quartus_map --read_settings_files=on --write_settings_files=off pbl -c pbl
 Warning (18236): Number of processors has not been specified which may cause overloading on shared machines.  Set the global assignment NUM_PARALLEL_PROCESSORS in your QSF to an appropriate value for best performance.
 Info (20030): Parallel compilation is enabled and will use 6 of the 6 processors detected
@@ -1453,7 +1453,7 @@ Info (12128): Elaborating entity "tanh_lut" for hierarchy "elm_accel:u_elm_accel
 Info (12128): Elaborating entity "argmax" for hierarchy "elm_accel:u_elm_accel|argmax:u_argmax" File: C:/Users/arthu/OneDrive/Documentos/uefs/SD/classificador de imagens/elm_accel.v Line: 303
 Info (12128): Elaborating entity "Control_unit" for hierarchy "elm_accel:u_elm_accel|Control_unit:u_Control_unit" File: C:/Users/arthu/OneDrive/Documentos/uefs/SD/classificador de imagens/elm_accel.v Line: 312
 Info (11170): Starting IP generation for the debug fabric: alt_sld_fab.
-Info (11172): 2026.04.08.20:48:44 Progress: Loading sld666f9a97/alt_sld_fab_wrapper_hw.tcl
+Info (11172): 2026.04.08.21:07:27 Progress: Loading sld666f9a97/alt_sld_fab_wrapper_hw.tcl
 Info (11172): Alt_sld_fab.alt_sld_fab: SLD fabric agents which did not specify prefer_host were connected to JTAG
 Info (11172): Alt_sld_fab: Generating "alt_sld_fab" for QUARTUS_SYNTH
 Info (11172): Alt_sld_fab: "alt_sld_fab" instantiated alt_sld_fab "alt_sld_fab"
@@ -1477,9 +1477,9 @@ Info (12021): Found 2 design units, including 1 entities, in source file db/ip/s
 Info (12021): Found 1 design units, including 1 entities, in source file db/ip/sld666f9a97/submodules/alt_sld_fab_alt_sld_fab_splitter.sv
     Info (12023): Found entity 1: alt_sld_fab_alt_sld_fab_splitter File: C:/Users/arthu/OneDrive/Documentos/uefs/SD/classificador de imagens/db/ip/sld666f9a97/submodules/alt_sld_fab_alt_sld_fab_splitter.sv Line: 3
 Warning (13024): Output pins are stuck at VCC or GND
-    Warning (13410): Pin "LEDR[7]" is stuck at GND File: C:/Users/arthu/OneDrive/Documentos/uefs/SD/classificador de imagens/top.v Line: 5
-    Warning (13410): Pin "LEDR[8]" is stuck at GND File: C:/Users/arthu/OneDrive/Documentos/uefs/SD/classificador de imagens/top.v Line: 5
-    Warning (13410): Pin "LEDR[9]" is stuck at GND File: C:/Users/arthu/OneDrive/Documentos/uefs/SD/classificador de imagens/top.v Line: 5
+    Warning (13410): Pin "LEDR[4]" is stuck at GND File: C:/Users/arthu/OneDrive/Documentos/uefs/SD/classificador de imagens/top.v Line: 5
+    Warning (13410): Pin "LEDR[5]" is stuck at GND File: C:/Users/arthu/OneDrive/Documentos/uefs/SD/classificador de imagens/top.v Line: 5
+    Warning (13410): Pin "LEDR[6]" is stuck at GND File: C:/Users/arthu/OneDrive/Documentos/uefs/SD/classificador de imagens/top.v Line: 5
     Warning (13410): Pin "HEX1[1]" is stuck at VCC File: C:/Users/arthu/OneDrive/Documentos/uefs/SD/classificador de imagens/top.v Line: 7
     Warning (13410): Pin "HEX2[0]" is stuck at VCC File: C:/Users/arthu/OneDrive/Documentos/uefs/SD/classificador de imagens/top.v Line: 8
 Info (286031): Timing-Driven Synthesis is running on partition "Top"
@@ -1504,8 +1504,8 @@ Info (21057): Implemented 5333 device resources after synthesis - the final reso
     Info (21062): Implemented 4 DSP elements
 Info: Quartus Prime Analysis & Synthesis was successful. 0 errors, 19 warnings
     Info: Peak virtual memory: 5093 megabytes
-    Info: Processing ended: Wed Apr  8 20:49:03 2026
-    Info: Elapsed time: 00:00:33
-    Info: Total CPU time (on all processors): 00:00:52
+    Info: Processing ended: Wed Apr  8 21:07:44 2026
+    Info: Elapsed time: 00:00:30
+    Info: Total CPU time (on all processors): 00:00:48
 
 

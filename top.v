@@ -40,9 +40,9 @@ module top (
         .hex1(HEX1),
         .hex0(HEX0),
         .ledr_pred(LEDR[3:0]),
-        .ledr_flags(LEDR[6:4])
+        .ledr_flags(LEDR[9:7])
     );
 
-    assign LEDR[9:7] = 3'b000;
+    assign LEDR[6:4] = 3'b000;
 
 endmodule
