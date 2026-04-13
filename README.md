@@ -10,6 +10,6 @@
 | 000 | RESET | Limpa os registradores e flags, e zera a predição (`pred = 0`). |
 | 001 | STORE_IMG | Escreve valores de pixels na memória de imagem (`mem_img[addr]`). |
 | 010 | STORE_WEIGHTS | Armazena os pesos na memória (`mem_W[addr]` ou `mem_beta`). |
-| 011 | STORE_BIAS | Armazena o bias na memória (`mem_b[...]`). |
+| 011 | STORE_BIAS | Armazena os viezes na memória (`mem_b[...]`). |
 | 100 | START | Inicia o processamento após verificar se os dados foram carregados. |
 | 101 | STATUS | Retorna o estado atual, incluindo flags e resultado da predição. |
