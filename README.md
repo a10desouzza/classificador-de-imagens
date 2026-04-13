@@ -5,8 +5,6 @@
 
 ### Tabela de Instruções
 
-### Tabela de Instruções
-
 | OP Code | Nome da operação | Descrição |
 |--------:|-----------------|-----------|
 | 000 | RESET | Limpa os registradores e flags, e zera a predição (`pred = 0`). |
