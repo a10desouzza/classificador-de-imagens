@@ -7,6 +7,7 @@
 
 Este barramento é responsavel por enviar ao Coprocessador as instruções a serem execultadas. O barramento de instruções é de 32 bits sendo 3 deles dedicados aos 6 OPCODES
 que o coprocessador possui, as intruções possuem campos e formatos diferentes, sendo assim nem todas as instruções utilizam os 32 bits.
+</details>
 
 <details>
 <summary><h3>Tabela de Instruções</h3></summary>
@@ -22,5 +23,4 @@ que o coprocessador possui, as intruções possuem campos e formatos diferentes,
 | 100 | START | Inicia o processamento após verificar se os dados foram carregados. |
 | 101 | STATUS | Retorna o estado atual, incluindo flags e resultado da predição. |
 
-</details>
 </details>
