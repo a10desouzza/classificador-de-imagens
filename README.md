@@ -6,7 +6,7 @@
 ### Barramento de instruções
 
 Este barramento é responsavel por enviar ao Coprocessador as instruções a serem execultadas. O barramento de instruções é de 32 bits sendo 3 deles dedicados aos 6 OPCODES
-que o coprocessador possui, as intruções possuem campos e formatos diferentes, sendo assim nem todas as instruções utilizam os 32 bits.
+que o coprocessador possui e, por padrão, 16 bits para dados e 13 para endereçamento de memória, as intruções possuem campos e formatos diferentes, sendo assim nem todas as instruções utilizam os 32 bits.
 </details>
 
 <details>
