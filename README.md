@@ -27,7 +27,7 @@ De forma mais específica, este marco busca demonstrar que o hardware é capaz d
 - produzir uma saída interpretável;
 - disponibilizar sinais de estado e resultado para testes locais e futura integração com processador.
 
-O barema do Marco 1 enfatiza seis dimensões de avaliação: correção funcional, arquitetura do datapath, paralelismo dos MACs, interface MMIO, ciclo de instrução e uso de recursos. Por isso, este README foi estruturado diretamente com base nesses critérios. :contentReference[oaicite:0]{index=0}
+O barema do Marco 1 enfatiza seis dimensões de avaliação: correção funcional, arquitetura do datapath, paralelismo dos MACs, interface MMIO, ciclo de instrução e uso de recursos. Por isso, este README foi estruturado diretamente com base nesses critérios.
 
 ---
 
