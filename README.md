@@ -9,7 +9,7 @@ O trabalho foi desenvolvido em grupo por:
 
 - **Arthur de Andrade Souza**
 - **Lucas Vilas Boas Dourado**
-- **Pedro Santos**
+- **Pedro Henrique Santos Silva**
 
 A proposta do projeto foi construir, em hardware, uma base funcional de inferência inspirada em uma **ELM (Extreme Learning Machine)**, usando a placa **DE1-SoC** como plataforma de testes. Mais do que apenas “fazer rodar”, a ideia foi estruturar uma solução organizada, compreensível e preparada para evoluir nos próximos marcos.
 
@@ -121,7 +121,11 @@ Durante os testes locais, foram utilizados:
 - `LEDR[6:4]` para mostrar flags de carregamento;
 - `HEX0..HEX3` para exibir o status do sistema.
 
+### 5.3 Utilização dos recusos da placa
+<img width="444" height="400" alt="image" src="https://github.com/user-attachments/assets/7f804a33-1dc6-4d56-a8ed-b38d1f517e81" />
+
 ---
+
 
 ## 6. Processo de instalação e configuração do ambiente
 
@@ -526,19 +530,8 @@ Outro próximo passo muito importante é comparar o hardware com um modelo de re
 
 Essa análise também fortalece bastante o projeto, porque mostra que a validação não foi feita apenas “olhando os LEDs”, mas também com base em uma referência confiável.
 
-### 17.3 Registrar métricas de síntese
 
-Como se trata de um projeto em FPGA, também faz sentido observar métricas como:
-
-- quantidade de LUTs;
-- quantidade de registradores;
-- uso de memória;
-- uso de DSPs;
-- frequência máxima estimada.
-
-Essas informações ajudam a entender melhor o custo da solução em hardware e deixam a documentação mais completa do ponto de vista de projeto digital.
-
-### 17.4 Refinar o uso do `STORE`
+### 17.3 Refinar o uso do `STORE`
 
 O `STORE` já foi corrigido para funcionar de forma mais coerente, mas ele ainda pode evoluir. Hoje ele já consegue atender bem dois cenários:
 
@@ -547,7 +540,7 @@ O `STORE` já foi corrigido para funcionar de forma mais coerente, mas ele ainda
 
 Mais à frente, esse mesmo mecanismo pode ser aproveitado de forma mais completa em uma integração com processador, em que os dados deixariam de vir das chaves da placa e passariam a ser enviados por software.
 
-### 17.5 Preparar integração com processador
+### 17.4 Preparar integração com processador
 
 Uma parte interessante da arquitetura atual é que ela já foi organizada pensando no futuro. Mesmo sendo testado localmente na placa, o sistema já possui uma saída de 32 bits e uma estrutura de controle que facilita a leitura externa do estado e da predição.
 
@@ -559,7 +552,202 @@ O próximo passo natural, nesse sentido, é permitir que:
 
 ---
 
-## 18. Conclusão
+## 18. Modo de uso
+
+Esta seção explica, de forma prática, como usar o sistema na placa DE1-SoC durante os testes.
+
+O projeto foi pensado para funcionar em dois cenários:
+
+- usando memórias já inicializadas por arquivos `.mif`;
+- usando escrita manual de teste com apoio dos switches e botões.
+
+Na maior parte dos testes do Marco 1, o uso mais comum foi com os dados já carregados nas memórias. Mesmo assim, o sistema também permite preparar e gravar valores manualmente, o que ajuda bastante na depuração.
+
+### 18.1 Organização dos switches e botões
+
+Durante o uso local na placa, os sinais são interpretados da seguinte forma:
+
+- `SW[2:0]` → opcode da instrução;
+- `SW[5:3]` → endereço de teste;
+- `SW[8:6]` → dado de teste;
+- `KEY[0]` → reset;
+- `KEY[1]` → confirmação da instrução;
+- `KEY[3]` → preparação de escrita para o `STORE`.
+
+Além disso:
+
+- `LEDR[3:0]` mostram a predição;
+- `LEDR[6:4]` mostram as flags de carregamento;
+- `HEX0..HEX3` mostram o status do sistema quando solicitado.
+
+---
+
+### 18.2 Uso mais comum com arquivos `.mif`
+
+Quando as memórias já estão carregadas com `.mif`, o fluxo mais comum é:
+
+1. programar a FPGA na placa;
+2. enviar `STORE_IMG`;
+3. enviar `STORE_W`;
+4. enviar `STORE_B`;
+5. enviar `START`;
+6. enviar `STATUS`, se quiser ver o estado no display.
+
+Nesse modo, normalmente os comandos `STORE` servem apenas para confirmar logicamente que os blocos necessários estão prontos. Ou seja, eles levantam as flags internas e liberam a execução do `START`, sem necessidade de regravar os valores já carregados por `.mif`.
+
+---
+
+### 18.3 Como enviar uma instrução
+
+Para enviar uma instrução simples:
+
+1. ajuste `SW[2:0]` com o opcode desejado;
+2. pressione `KEY[1]`.
+
+Exemplos:
+
+- `000` → `CLEAR_ERR`
+- `001` → `STORE_IMG`
+- `010` → `STORE_W`
+- `011` → `STORE_B`
+- `100` → `START`
+- `101` → `STATUS`
+
+Se a instrução não depender de escrita manual, esse procedimento já é suficiente.
+
+---
+
+### 18.4 Como usar o `STORE` apenas para levantar a flag
+
+Se a memória já foi carregada por `.mif`, você pode usar o `STORE` apenas como confirmação lógica.
+
+Exemplo:
+
+1. coloque o opcode de `STORE_IMG` em `SW[2:0]`;
+2. pressione `KEY[1]`.
+
+Nesse caso:
+
+- a memória não precisa ser alterada;
+- a flag `img_ok` será ativada;
+- o sistema passa a considerar a imagem como pronta.
+
+O mesmo vale para:
+
+- `STORE_W`
+- `STORE_B`
+
+Esse modo foi mantido justamente porque ele combina melhor com o uso de memórias inicializadas por arquivo.
+
+---
+
+### 18.5 Como fazer uma escrita manual de teste
+
+Se quiser testar gravação real em memória, use o seguinte fluxo:
+
+1. ajuste `SW[2:0]` com o opcode do `STORE`;
+2. ajuste `SW[5:3]` com o endereço de teste;
+3. ajuste `SW[8:6]` com o dado de teste;
+4. pressione `KEY[3]` para preparar a escrita;
+5. pressione `KEY[1]` para confirmar o `STORE`.
+
+Nesse caso, a escrita acontece em duas etapas:
+
+- primeiro o valor é preparado;
+- depois ele é realmente gravado.
+
+Esse comportamento foi escolhido para evitar escritas acidentais e tornar o fluxo mais organizado.
+
+---
+
+### 18.6 Exemplo prático de escrita manual
+
+Suponha que queremos testar um `STORE_IMG`.
+
+#### Exemplo:
+- opcode = `001`
+- endereço = `111`
+- dado = `101`
+
+Passos:
+
+1. colocar `001` em `SW[2:0]`;
+2. colocar `111` em `SW[5:3]`;
+3. colocar `101` em `SW[8:6]`;
+4. apertar `KEY[3]` para preparar;
+5. apertar `KEY[1]` para gravar.
+
+Importante:
+
+- apertar apenas `KEY[3]` não grava nada;
+- apertar `KEY[1]` sem preparação também não grava nada;
+- para haver escrita real, é necessário fazer as duas etapas.
+
+---
+
+### 18.7 Como iniciar a inferência
+
+Depois que as flags de imagem, pesos e bias estiverem ativas, a inferência pode ser iniciada.
+
+Passos:
+
+1. colocar `100` em `SW[2:0]`;
+2. pressionar `KEY[1]`.
+
+Se tudo estiver certo, o sistema entra em processamento.  
+Se faltar alguma flag necessária, ele pode ir para o estado de erro.
+
+---
+
+### 18.8 Como consultar o estado
+
+Para visualizar o estado atual do sistema nos displays:
+
+1. colocar `101` em `SW[2:0]`;
+2. pressionar `KEY[1]`.
+
+O estado será mostrado temporariamente nos displays `HEX0..HEX3`. Depois do tempo configurado no projeto, a exibição será apagada automaticamente.
+
+---
+
+### 18.9 Como limpar um erro
+
+Se o sistema entrar em erro, use:
+
+1. `SW[2:0] = 000`
+2. pressione `KEY[1]`
+
+Isso envia `CLEAR_ERR` e devolve o sistema ao estado normal.
+
+---
+
+### 18.10 Resumo rápido de uso
+
+#### Fluxo normal com `.mif`
+1. `STORE_IMG`
+2. `STORE_W`
+3. `STORE_B`
+4. `START`
+5. `STATUS`
+
+#### Fluxo de escrita manual
+1. configurar opcode, endereço e dado
+2. `KEY[3]` para preparar
+3. `KEY[1]` para gravar
+
+#### Fluxo de erro
+1. `CLEAR_ERR`
+2. repetir o processo corretamente
+
+---
+
+### 18.11 Observação importante
+
+Mesmo que o sistema esteja sendo usado atualmente com a placa e os switches, a arquitetura já foi preparada para evoluir. Isso significa que, no futuro, o envio de instruções e dados poderá deixar de ser manual e passar a ser feito por um processador externo, sem exigir uma reformulação completa da lógica principal.
+
+---
+
+## 19. Conclusão
 
 Este projeto foi uma etapa importante na construção de um acelerador de inferência em FPGA para classificação de dígitos. Ao longo do desenvolvimento, o foco não ficou apenas em montar blocos isolados, mas em fazer com que eles conversassem corretamente e formassem um fluxo coerente de processamento.
 
@@ -581,7 +769,7 @@ De forma geral, este trabalho mostrou que a ideia do acelerador é viável, que 
 
 ---
 
-## 19. Checklist final
+## 20. Checklist final
 
 Antes de considerar a entrega completamente encerrada, vale a pena revisar os seguintes pontos:
 
