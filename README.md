@@ -121,7 +121,11 @@ Durante os testes locais, foram utilizados:
 - `LEDR[6:4]` para mostrar flags de carregamento;
 - `HEX0..HEX3` para exibir o status do sistema.
 
+### 5.3 Utilização dos recusos da placa
+<img width="444" height="400" alt="image" src="https://github.com/user-attachments/assets/7f804a33-1dc6-4d56-a8ed-b38d1f517e81" />
+
 ---
+
 
 ## 6. Processo de instalação e configuração do ambiente
 
@@ -526,11 +530,8 @@ Outro próximo passo muito importante é comparar o hardware com um modelo de re
 
 Essa análise também fortalece bastante o projeto, porque mostra que a validação não foi feita apenas “olhando os LEDs”, mas também com base em uma referência confiável.
 
-### 17.3 Registrar métricas de síntese
 
-(Adicionar print e texto do Quartus)
-
-### 17.4 Refinar o uso do `STORE`
+### 17.3 Refinar o uso do `STORE`
 
 O `STORE` já foi corrigido para funcionar de forma mais coerente, mas ele ainda pode evoluir. Hoje ele já consegue atender bem dois cenários:
 
@@ -539,7 +540,7 @@ O `STORE` já foi corrigido para funcionar de forma mais coerente, mas ele ainda
 
 Mais à frente, esse mesmo mecanismo pode ser aproveitado de forma mais completa em uma integração com processador, em que os dados deixariam de vir das chaves da placa e passariam a ser enviados por software.
 
-### 17.5 Preparar integração com processador
+### 17.4 Preparar integração com processador
 
 Uma parte interessante da arquitetura atual é que ela já foi organizada pensando no futuro. Mesmo sendo testado localmente na placa, o sistema já possui uma saída de 32 bits e uma estrutura de controle que facilita a leitura externa do estado e da predição.
 
