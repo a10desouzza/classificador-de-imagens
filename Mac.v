@@ -1,7 +1,7 @@
 module Mac #(
-    parameter integer DATA_W = 16,
-    parameter integer ACC_W  = 32,
-    parameter integer Q_FRAC = 12
+    parameter integer DATA_W = 16,  // largura dos operandos
+    parameter integer ACC_W  = 32,  // largura do produto
+    parameter integer Q_FRAC = 12   // bits fracionários do formato Q4.12
 )(
     input  wire signed [DATA_W-1:0] a,
     input  wire signed [DATA_W-1:0] b,
@@ -9,7 +9,10 @@ module Mac #(
     output wire signed [ACC_W-1:0]  product_scaled
 );
 
+    // Produto completo
     assign product_full   = $signed(a) * $signed(b);
+
+    // Reescala para manter os números em Q4.12
     assign product_scaled = product_full >>> Q_FRAC;
 
 endmodule

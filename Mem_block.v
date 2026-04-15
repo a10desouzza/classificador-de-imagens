@@ -1,31 +1,40 @@
 module Mem_block (
     input  wire                  clk,
 
+    // Endereço de leitura da imagem
     input  wire [9:0]            img_addr,
     output wire signed [15:0]    img_q,
 
+    // Endereço de leitura dos pesos
     input  wire [16:0]           w_addr,
     output wire signed [15:0]    w_q,
 
+    // Endereço de leitura dos bias
     input  wire [6:0]            b_addr,
     output wire signed [15:0]    b_q,
 
+    // Endereço de leitura dos beta
     input  wire [10:0]           beta_addr,
     output wire signed [15:0]    beta_q,
 
+    // Porta de escrita da imagem
     input  wire                  wr_en_img,
     input  wire [9:0]            wr_addr_img,
     input  wire signed [15:0]    wr_data_img,
 
+    // Porta de escrita dos pesos
     input  wire                  wr_en_w,
     input  wire [16:0]           wr_addr_w,
     input  wire signed [15:0]    wr_data_w,
 
+    // Porta de escrita dos bias
     input  wire                  wr_en_b,
     input  wire [6:0]            wr_addr_b,
     input  wire signed [15:0]    wr_data_b
 );
 
+    // Se houver escrita, o endereço de escrita tem prioridade.
+    // Caso contrário, usa o endereço da inferência.
     wire [9:0]  img_addr_mux;
     wire [16:0] w_addr_mux;
     wire [6:0]  b_addr_mux;
@@ -34,6 +43,7 @@ module Mem_block (
     assign w_addr_mux   = wr_en_w   ? wr_addr_w   : w_addr;
     assign b_addr_mux   = wr_en_b   ? wr_addr_b   : b_addr;
 
+    // RAM da imagem
     ram_img_784x16 mem_img (
         .clock(clk),
         .address(img_addr_mux),
@@ -42,6 +52,7 @@ module Mem_block (
         .q(img_q)
     );
 
+    // RAM dos pesos da camada oculta
     ram_W_100352x16 mem_W (
         .clock(clk),
         .address(w_addr_mux),
@@ -50,6 +61,7 @@ module Mem_block (
         .q(w_q)
     );
 
+    // RAM dos bias
     ram_b_128x16 mem_b (
         .clock(clk),
         .address(b_addr_mux),
@@ -58,6 +70,7 @@ module Mem_block (
         .q(b_q)
     );
 
+    // ROM dos betas da camada de saída
     rom_beta_1280x16 rom_beta (
         .clock(clk),
         .address(beta_addr),

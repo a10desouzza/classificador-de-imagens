@@ -6,6 +6,7 @@ module tanh_lut #(
     output reg  signed [DATA_W-1:0] y_out
 );
 
+    // Pontos de quebra
     localparam signed [15:0] X0 = 16'sd0;
     localparam signed [15:0] X1 = 16'sd2048;
     localparam signed [15:0] X2 = 16'sd4096;
@@ -13,18 +14,21 @@ module tanh_lut #(
     localparam signed [15:0] X4 = 16'sd8192;
     localparam signed [15:0] X5 = 16'sd12288;
 
+    // Valores da tanh nesses pontos
     localparam signed [15:0] Y0 = 16'sd0;
     localparam signed [15:0] Y1 = 16'sd1893;
     localparam signed [15:0] Y2 = 16'sd3122;
     localparam signed [15:0] Y3 = 16'sd3708;
     localparam signed [15:0] Y4 = 16'sd3949;
 
+    // Inclinações dos segmentos
     localparam signed [15:0] S01 = 16'sd3786;
     localparam signed [15:0] S12 = 16'sd2460;
     localparam signed [15:0] S23 = 16'sd1172;
     localparam signed [15:0] S34 = 16'sd483;
     localparam signed [15:0] S45 = 16'sd128;
 
+    // Saturação
     localparam signed [15:0] SAT_POS = 16'sd4095;
     localparam signed [15:0] SAT_NEG = -16'sd4095;
 
@@ -38,13 +42,16 @@ module tanh_lut #(
     reg signed [15:0] y_abs;
 
     always @(*) begin
+        // Detecta sinal
         sign_neg = x_in[DATA_W-1];
 
+        // Valor absoluto
         if (sign_neg)
             x_abs_u = {1'b0, (~x_in + 16'd1)};
         else
             x_abs_u = {1'b0, x_in};
 
+        // Defaults
         x0_seg_u    = X0[15:0];
         y0_seg      = Y0;
         slope_seg   = S01;
@@ -52,6 +59,7 @@ module tanh_lut #(
         interp_full = 32'sd0;
         y_abs       = 16'sd0;
 
+        // Saturação ou interpolação
         if (x_abs_u >= {1'b0, X5[15:0]}) begin
             y_abs = SAT_POS;
         end else begin
@@ -87,11 +95,13 @@ module tanh_lut #(
                 y_abs = 16'sd0;
         end
 
+        // Restaura sinal
         if (sign_neg)
             y_out = -y_abs;
         else
             y_out = y_abs;
 
+        // Saturação final
         if (y_out > SAT_POS)
             y_out = SAT_POS;
         else if (y_out < SAT_NEG)

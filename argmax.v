@@ -11,15 +11,16 @@ module argmax #(
     input  wire signed [ACC_W-1:0] y7,
     input  wire signed [ACC_W-1:0] y8,
     input  wire signed [ACC_W-1:0] y9,
-
     output reg  [3:0]              pred,
     output reg  signed [ACC_W-1:0] max_val
 );
 
     always @(*) begin
+        // Assume inicialmente a classe 0 como a maior
         pred    = 4'd0;
         max_val = y0;
 
+        // Compara todas as demais classes
         if (y1 > max_val) begin max_val = y1; pred = 4'd1; end
         if (y2 > max_val) begin max_val = y2; pred = 4'd2; end
         if (y3 > max_val) begin max_val = y3; pred = 4'd3; end

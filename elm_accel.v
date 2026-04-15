@@ -1,7 +1,7 @@
 module elm_accel #(
-    parameter integer D       = 784,
-    parameter integer H       = 128,
-    parameter integer C       = 10,
+    parameter integer D       = 784,       // 28x28 pixels
+    parameter integer H       = 128,       // neurônios ocultos
+    parameter integer C       = 10,        // classes de saída
     parameter integer DATA_W  = 16,
     parameter integer ACC_W   = 32,
     parameter integer Q_FRAC  = 12,
@@ -12,14 +12,19 @@ module elm_accel #(
     input  wire                  clk,
     input  wire                  reset_n,
 
-    // Entrada principal em 32 bits
+    // Barramento vindo do top
     input  wire [31:0]           sw,
+
+    // KEY[1] = confirmar instrução
     input  wire                  confirm_btn,
 
-    // Saída principal em 32 bits
+    // KEY[3] = preparar STORE
+    input  wire                  prep_btn,
+
+    // Saída consolidada
     output wire [31:0]           result_out,
 
-    // Avalon MM Slave
+    // Interface Avalon
     input  wire [3:0]            avs_address,
     input  wire                  avs_write,
     input  wire [31:0]           avs_writedata,
@@ -27,7 +32,7 @@ module elm_accel #(
     output reg  [31:0]           avs_readdata,
     output wire                  avs_waitrequest,
 
-    // Saídas locais da placa
+    // Saídas locais
     output wire [6:0]            hex3,
     output wire [6:0]            hex2,
     output wire [6:0]            hex1,
@@ -39,14 +44,25 @@ module elm_accel #(
     assign avs_waitrequest = 1'b0;
 
     // -------------------------------------------------------------------------
+    // Decodificação dos switches
+    // -------------------------------------------------------------------------
+    wire [2:0] cmd_opcode;   // SW[2:0]
+    wire [2:0] test_addr3;   // SW[5:3]
+    wire [2:0] test_data3;   // SW[8:6]
+
+    assign cmd_opcode = sw[2:0];
+    assign test_addr3 = sw[5:3];
+    assign test_data3 = sw[8:6];
+
+    // -------------------------------------------------------------------------
     // Comandos
     // -------------------------------------------------------------------------
-    localparam [31:0] CMD_CLEAR_ERR = 32'd0;
-    localparam [31:0] CMD_STORE_IMG = 32'd1;
-    localparam [31:0] CMD_STORE_W   = 32'd2;
-    localparam [31:0] CMD_STORE_B   = 32'd3;
-    localparam [31:0] CMD_START     = 32'd4;
-    localparam [31:0] CMD_STATUS    = 32'd5;
+    localparam [2:0] CMD_CLEAR_ERR = 3'd0;
+    localparam [2:0] CMD_STORE_IMG = 3'd1;
+    localparam [2:0] CMD_STORE_W   = 3'd2;
+    localparam [2:0] CMD_STORE_B   = 3'd3;
+    localparam [2:0] CMD_START     = 3'd4;
+    localparam [2:0] CMD_STATUS    = 3'd5;
 
     // -------------------------------------------------------------------------
     // Estados principais
@@ -56,7 +72,7 @@ module elm_accel #(
     localparam [1:0] ERROR = 2'b10;
 
     // -------------------------------------------------------------------------
-    // Fases internas
+    // Fases internas da inferência
     // -------------------------------------------------------------------------
     localparam [4:0] PH_H_ADDR        = 5'd0;
     localparam [4:0] PH_H_WAIT0       = 5'd1;
@@ -76,43 +92,38 @@ module elm_accel #(
     localparam integer STATUS_HOLD_CYCLES = CLK_HZ * STATUS_ON_SECONDS;
 
     // -------------------------------------------------------------------------
-    // Pulso do botão
+    // Geração de pulso de borda para os botões
     // -------------------------------------------------------------------------
     reg confirm_d1, confirm_d2;
-    wire cmd_fire;
+    reg prep_d1, prep_d2;
 
-    assign cmd_fire = confirm_d1 & ~confirm_d2;
+    wire cmd_fire;
+    wire prep_fire;
+
+    assign cmd_fire  = confirm_d1 & ~confirm_d2;
+    assign prep_fire = prep_d1 & ~prep_d2;
 
     // -------------------------------------------------------------------------
-    // Estado e controle
+    // Estado principal
     // -------------------------------------------------------------------------
     reg [1:0]  estado_atual;
-    reg [31:0] opcode;
+    reg [2:0]  opcode;
     reg [4:0]  phase;
 
     // -------------------------------------------------------------------------
-    // Flags
+    // Flags de disponibilidade dos blocos
     // -------------------------------------------------------------------------
     reg img_ok, w_ok, b_ok;
     assign ledr_flags = {img_ok, w_ok, b_ok};
 
     // -------------------------------------------------------------------------
-    // Predição
+    // Predição final
     // -------------------------------------------------------------------------
     reg [3:0] pred_reg;
     assign ledr_pred = pred_reg;
 
     // -------------------------------------------------------------------------
-    // Barramento de saída 32 bits
-    // [0]   busy
-    // [1]   done
-    // [2]   error
-    // [6:3] pred
-    // [7]   b_ok
-    // [8]   w_ok
-    // [9]   img_ok
-    // [11:10] estado_atual
-    // [31:12] reservado
+    // Montagem da palavra de saída
     // -------------------------------------------------------------------------
     function [31:0] make_result;
         input [1:0] st;
@@ -122,15 +133,15 @@ module elm_accel #(
         input [3:0] predf;
         begin
             make_result = {
-                20'd0,
-                st,
-                imgf,
-                wf,
-                bf,
-                predf,
-                (st == ERROR),
-                (st == DONE),
-                (st == BUSY)
+                20'd0,            // reservado
+                st,               // estado codificado
+                imgf,             // img_ok
+                wf,               // w_ok
+                bf,               // b_ok
+                predf,            // predição
+                (st == ERROR),    // erro
+                (st == DONE),     // done
+                (st == BUSY)      // busy
             };
         end
     endfunction
@@ -140,14 +151,14 @@ module elm_accel #(
     assign result_out  = result_live;
 
     // -------------------------------------------------------------------------
-    // Display de status
+    // Controle do display de status
     // -------------------------------------------------------------------------
     reg        status_visible;
     reg [31:0] status_hold_counter;
     reg [31:0] status_display_word;
 
     // -------------------------------------------------------------------------
-    // Índices
+    // Índices internos da inferência
     // -------------------------------------------------------------------------
     reg [9:0] in_idx;
     reg [6:0] hid_idx;
@@ -161,19 +172,20 @@ module elm_accel #(
     reg [6:0]  b_addr;
     reg [10:0] beta_addr;
 
+    // Leituras das memórias
     wire signed [15:0] img_q;
     wire signed [15:0] w_q;
     wire signed [15:0] b_q;
     wire signed [15:0] beta_q;
 
     // -------------------------------------------------------------------------
-    // Pré-processamento da imagem
+    // Binarização da imagem
     // -------------------------------------------------------------------------
     wire signed [15:0] img_q_bin;
     assign img_q_bin = (img_q >= IMG_BIN_TH) ? 16'sd4095 : 16'sd0;
 
     // -------------------------------------------------------------------------
-    // Escrita Avalon
+    // Sinais de escrita real das memórias
     // -------------------------------------------------------------------------
     reg                  wr_en_img, wr_en_w, wr_en_b;
     reg [9:0]            wr_addr_img;
@@ -184,7 +196,36 @@ module elm_accel #(
     reg signed [15:0]    wr_data_b;
 
     // -------------------------------------------------------------------------
-    // Datapath
+    // Registradores de preparação do STORE
+    // KEY[3] coloca endereço+dado aqui
+    // KEY[1] com STORE faz o commit real
+    // -------------------------------------------------------------------------
+    reg                  prep_img_valid;
+    reg [9:0]            prep_img_addr;
+    reg signed [15:0]    prep_img_data;
+
+    reg                  prep_w_valid;
+    reg [16:0]           prep_w_addr;
+    reg signed [15:0]    prep_w_data;
+
+    reg                  prep_b_valid;
+    reg [6:0]            prep_b_addr;
+    reg signed [15:0]    prep_b_data;
+
+    // -------------------------------------------------------------------------
+    // Dados manuais de teste
+    // -------------------------------------------------------------------------
+    wire signed [15:0] test_img_data_q412;
+    wire signed [15:0] test_signed_data_q412;
+
+    // Para imagem, monta um valor positivo simples em Q4.12
+    assign test_img_data_q412    = {4'd0, test_data3, 9'd0};
+
+    // Para peso/bias, interpreta os 3 bits como signed
+    assign test_signed_data_q412 = $signed({{13{test_data3[2]}}, test_data3}) <<< 10;
+
+    // -------------------------------------------------------------------------
+    // Datapath principal
     // -------------------------------------------------------------------------
     reg signed [ACC_W-1:0] acc;
     reg signed [ACC_W-1:0] z_hidden;
@@ -203,14 +244,11 @@ module elm_accel #(
     wire [3:0]              pred_argmax;
     wire signed [ACC_W-1:0] max_val_unused;
 
-    // -------------------------------------------------------------------------
-    // Ciclos
-    // -------------------------------------------------------------------------
     reg [31:0] cycles_reg;
     reg [31:0] run_cycles;
 
     // -------------------------------------------------------------------------
-    // Auxiliares de endereço
+    // Cálculo de endereços
     // -------------------------------------------------------------------------
     wire [16:0] hid_x784;
     wire [10:0] hid_x10;
@@ -223,7 +261,7 @@ module elm_accel #(
                     + ({4'b0, hid_idx} << 1);
 
     // -------------------------------------------------------------------------
-    // Saturação 32 -> 16
+    // Saturação de 32 para 16 bits
     // -------------------------------------------------------------------------
     function signed [DATA_W-1:0] sat32_to_q16;
         input signed [ACC_W-1:0] x;
@@ -240,7 +278,7 @@ module elm_accel #(
     assign z_sat = sat32_to_q16(z_hidden);
 
     // -------------------------------------------------------------------------
-    // Memórias
+    // Instâncias dos blocos
     // -------------------------------------------------------------------------
     Mem_block u_mem (
         .clk(clk),
@@ -312,20 +350,109 @@ module elm_accel #(
     );
 
     // -------------------------------------------------------------------------
-    // Sincronização do botão
+    // Sincronização dos botões
     // -------------------------------------------------------------------------
     always @(posedge clk or negedge reset_n) begin
         if (!reset_n) begin
             confirm_d1 <= 1'b0;
             confirm_d2 <= 1'b0;
+            prep_d1    <= 1'b0;
+            prep_d2    <= 1'b0;
         end else begin
             confirm_d1 <= confirm_btn;
             confirm_d2 <= confirm_d1;
+            prep_d1    <= prep_btn;
+            prep_d2    <= prep_d1;
         end
     end
 
     // -------------------------------------------------------------------------
-    // Escrita MMIO das memórias
+    // Bloco único da preparação do STORE
+    // Resolve o problema de múltiplos drivers em prep_*_valid
+    // -------------------------------------------------------------------------
+    always @(posedge clk or negedge reset_n) begin
+        if (!reset_n) begin
+            prep_img_valid <= 1'b0;
+            prep_img_addr  <= 10'd0;
+            prep_img_data  <= 16'sd0;
+
+            prep_w_valid   <= 1'b0;
+            prep_w_addr    <= 17'd0;
+            prep_w_data    <= 16'sd0;
+
+            prep_b_valid   <= 1'b0;
+            prep_b_addr    <= 7'd0;
+            prep_b_data    <= 16'sd0;
+        end else begin
+            // Modo Avalon: prepara dado externo
+            if (avs_write) begin
+                case (avs_address)
+                    4'h0: begin
+                        prep_img_valid <= 1'b1;
+                        prep_img_addr  <= avs_writedata[25:16];
+                        prep_img_data  <= avs_writedata[15:0];
+                    end
+                    4'h1: begin
+                        prep_w_valid <= 1'b1;
+                        prep_w_addr  <= avs_writedata[28:12];
+                        prep_w_data  <= avs_writedata[15:0];
+                    end
+                    4'h2: begin
+                        prep_b_valid <= 1'b1;
+                        prep_b_addr  <= avs_writedata[22:16];
+                        prep_b_data  <= avs_writedata[15:0];
+                    end
+                    default: begin
+                    end
+                endcase
+            end
+            // Modo manual: KEY[3] prepara endereço+dado
+            else if (prep_fire) begin
+                case (cmd_opcode)
+                    CMD_STORE_IMG: begin
+                        prep_img_valid <= 1'b1;
+                        prep_img_addr  <= {7'd0, test_addr3};
+                        prep_img_data  <= test_img_data_q412;
+                    end
+                    CMD_STORE_W: begin
+                        prep_w_valid <= 1'b1;
+                        prep_w_addr  <= {14'd0, test_addr3};
+                        prep_w_data  <= test_signed_data_q412;
+                    end
+                    CMD_STORE_B: begin
+                        prep_b_valid <= 1'b1;
+                        prep_b_addr  <= {4'd0, test_addr3};
+                        prep_b_data  <= test_signed_data_q412;
+                    end
+                    default: begin
+                    end
+                endcase
+            end
+            // Depois do commit por KEY[1], limpa a validade
+            else if (cmd_fire) begin
+                case (cmd_opcode)
+                    CMD_STORE_IMG: begin
+                        if (prep_img_valid)
+                            prep_img_valid <= 1'b0;
+                    end
+                    CMD_STORE_W: begin
+                        if (prep_w_valid)
+                            prep_w_valid <= 1'b0;
+                    end
+                    CMD_STORE_B: begin
+                        if (prep_b_valid)
+                            prep_b_valid <= 1'b0;
+                    end
+                    default: begin
+                    end
+                endcase
+            end
+        end
+    end
+
+    // -------------------------------------------------------------------------
+    // Commit real nas memórias
+    // Se não houver preparação válida, não escreve nada
     // -------------------------------------------------------------------------
     always @(posedge clk or negedge reset_n) begin
         if (!reset_n) begin
@@ -343,30 +470,30 @@ module elm_accel #(
             wr_en_w   <= 1'b0;
             wr_en_b   <= 1'b0;
 
-            if (avs_write) begin
-                case (avs_address)
-                    4'h0: begin
-                        wr_en_img   <= 1'b1;
-                        wr_addr_img <= avs_writedata[25:16];
-                        wr_data_img <= avs_writedata[15:0];
+            if (cmd_fire) begin
+                case (cmd_opcode)
+                    CMD_STORE_IMG: begin
+                        if (prep_img_valid) begin
+                            wr_en_img   <= 1'b1;
+                            wr_addr_img <= prep_img_addr;
+                            wr_data_img <= prep_img_data;
+                        end
                     end
-
-                    4'h1: begin
-                        wr_en_w   <= 1'b1;
-                        wr_addr_w <= avs_writedata[28:12];
-                        wr_data_w <= avs_writedata[15:0];
+                    CMD_STORE_W: begin
+                        if (prep_w_valid) begin
+                            wr_en_w   <= 1'b1;
+                            wr_addr_w <= prep_w_addr;
+                            wr_data_w <= prep_w_data;
+                        end
                     end
-
-                    4'h2: begin
-                        wr_en_b   <= 1'b1;
-                        wr_addr_b <= avs_writedata[22:16];
-                        wr_data_b <= avs_writedata[15:0];
+                    CMD_STORE_B: begin
+                        if (prep_b_valid) begin
+                            wr_en_b   <= 1'b1;
+                            wr_addr_b <= prep_b_addr;
+                            wr_data_b <= prep_b_data;
+                        end
                     end
-
                     default: begin
-                        wr_en_img <= 1'b0;
-                        wr_en_w   <= 1'b0;
-                        wr_en_b   <= 1'b0;
                     end
                 endcase
             end
@@ -374,7 +501,7 @@ module elm_accel #(
     end
 
     // -------------------------------------------------------------------------
-    // Controle do display de status
+    // Controle do STATUS nos displays
     // -------------------------------------------------------------------------
     always @(posedge clk or negedge reset_n) begin
         if (!reset_n) begin
@@ -382,7 +509,7 @@ module elm_accel #(
             status_hold_counter <= 32'd0;
             status_display_word <= 32'd0;
         end else begin
-            if (cmd_fire && (sw == CMD_STATUS)) begin
+            if (cmd_fire && (cmd_opcode == CMD_STATUS)) begin
                 status_display_word <= result_live;
                 status_visible      <= 1'b1;
                 status_hold_counter <= 32'd0;
@@ -436,11 +563,13 @@ module elm_accel #(
                 y_mem[i] <= 32'sd0;
         end else begin
             case (estado_atual)
+
+                // Estado ocioso
                 DONE: begin
                     phase <= PH_H_ADDR;
 
                     if (cmd_fire) begin
-                        case (sw)
+                        case (cmd_opcode)
                             CMD_STORE_IMG: begin
                                 opcode       <= CMD_STORE_IMG;
                                 estado_atual <= BUSY;
@@ -457,6 +586,7 @@ module elm_accel #(
                             end
 
                             CMD_START: begin
+                                // Só inicia se tudo estiver pronto
                                 if (img_ok && w_ok && b_ok) begin
                                     opcode       <= CMD_START;
                                     estado_atual <= BUSY;
@@ -495,8 +625,10 @@ module elm_accel #(
                     end
                 end
 
+                // Estado ocupado
                 BUSY: begin
                     if (opcode != CMD_START) begin
+                        // STORE só levanta as flags
                         case (opcode)
                             CMD_STORE_IMG: img_ok <= 1'b1;
                             CMD_STORE_W:   w_ok   <= 1'b1;
@@ -509,6 +641,7 @@ module elm_accel #(
                         run_cycles <= run_cycles + 32'd1;
 
                         case (phase)
+                            // Camada oculta
                             PH_H_ADDR: begin
                                 img_addr <= in_idx;
                                 w_addr   <= hid_x784 + {7'b0, in_idx};
@@ -568,6 +701,7 @@ module elm_accel #(
                                 end
                             end
 
+                            // Camada de saída
                             PH_O_ADDR: begin
                                 beta_addr <= hid_x10 + {7'b0, cls_idx};
                                 phase     <= PH_O_WAIT0;
@@ -601,6 +735,7 @@ module elm_accel #(
                                 end
                             end
 
+                            // Argmax final
                             PH_ARGMAX: begin
                                 pred_reg     <= pred_argmax;
                                 cycles_reg   <= run_cycles + 32'd1;
@@ -614,8 +749,9 @@ module elm_accel #(
                     end
                 end
 
+                // Estado de erro
                 ERROR: begin
-                    if (cmd_fire && (sw == CMD_CLEAR_ERR))
+                    if (cmd_fire && (cmd_opcode == CMD_CLEAR_ERR))
                         estado_atual <= DONE;
                 end
 
@@ -627,7 +763,7 @@ module elm_accel #(
     end
 
     // -------------------------------------------------------------------------
-    // Leitura MMIO
+    // Leitura Avalon
     // -------------------------------------------------------------------------
     always @(*) begin
         if (avs_read) begin
