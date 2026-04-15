@@ -9,7 +9,7 @@ O trabalho foi desenvolvido em grupo por:
 
 - **Arthur de Andrade Souza**
 - **Lucas Vilas Boas Dourado**
-- **Pedro Santos**
+- **Pedro Henrique Santos Silva**
 
 A proposta do projeto foi construir, em hardware, uma base funcional de inferência inspirada em uma **ELM (Extreme Learning Machine)**, usando a placa **DE1-SoC** como plataforma de testes. Mais do que apenas “fazer rodar”, a ideia foi estruturar uma solução organizada, compreensível e preparada para evoluir nos próximos marcos.
 
