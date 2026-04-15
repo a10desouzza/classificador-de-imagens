@@ -528,15 +528,7 @@ Essa análise também fortalece bastante o projeto, porque mostra que a validaç
 
 ### 17.3 Registrar métricas de síntese
 
-Como se trata de um projeto em FPGA, também faz sentido observar métricas como:
-
-- quantidade de LUTs;
-- quantidade de registradores;
-- uso de memória;
-- uso de DSPs;
-- frequência máxima estimada.
-
-Essas informações ajudam a entender melhor o custo da solução em hardware e deixam a documentação mais completa do ponto de vista de projeto digital.
+(Adicionar print e texto do Quartus)
 
 ### 17.4 Refinar o uso do `STORE`
 
