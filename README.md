@@ -1,6 +1,34 @@
 # Co-processador ELM em FPGA para Classificação de Dígitos
 ## MI Sistemas Digitais 2026.1 — Marco 1
 
+## Sumário
+
+1. Apresentação do projeto  
+2. Objetivo  
+3. Levantamento de requisitos  
+4. Softwares utilizados  
+5. Hardware utilizado nos testes  
+6. Processo de instalação e configuração do ambiente  
+7. Interface de controle e tabela de instruções  
+8. Visão geral da arquitetura  
+9. Organização do fluxo da inferência  
+10. Máquina de estados  
+11. Formato numérico usado  
+12. Funcionamento prático do `STORE`  
+13. Funcionamento na placa  
+14. Testes realizados  
+15. Resultados observados  
+16. Limitações atuais  
+17. Estrutura do repositório  
+18. Próximos passos  
+19. Conclusão  
+20. Considerações finais  
+21. Checklist final  
+22. Autores  
+23. Referências
+
+---
+
 ## 1. Apresentação do projeto
 
 Este repositório reúne a implementação do **Marco 1** da disciplina **MI Sistemas Digitais**, com foco no desenvolvimento de um **co-processador em FPGA** capaz de realizar a inferência de dígitos numéricos a partir de imagens.
@@ -785,3 +813,16 @@ Antes de considerar a entrega completamente encerrada, vale a pena revisar os se
 - [ ] validar mais uma vez o fluxo completo em hardware.
 
 ---
+
+## 23. Referências
+
+As referências abaixo foram utilizadas como base conceitual para o desenvolvimento do projeto, especialmente nos temas relacionados a FPGA, Verilog, memórias, ponto fixo, funções de ativação e classificação de padrões.
+
+1. INTEL. **Intel Quartus Prime Lite Edition User Guide**. Documentação oficial da ferramenta de desenvolvimento para FPGA.  
+2. INTEL. **DE1-SoC User Manual**. Manual da placa utilizada nos testes.  
+3. PALM, Reinaldo A. R. **Projeto de Circuitos Digitais com FPGA**. Material de apoio sobre desenvolvimento digital em hardware reconfigurável.  
+4. PEDROSO, Melvin; HENNESSY, John; PATTERSON, David. **Organização e Projeto de Computadores**. Base teórica para arquitetura digital, controle e fluxo de dados.  
+5. GOODFELLOW, Ian; BENGIO, Yoshua; COURVILLE, Aaron. **Deep Learning**. MIT Press, 2016. Referência conceitual para redes neurais e funções de ativação.  
+6. HAYKIN, Simon. **Neural Networks and Learning Machines**. 3. ed. Pearson, 2009. Referência para fundamentos de redes neurais artificiais.  
+7. Documentação e materiais da disciplina **MI Sistemas Digitais**, utilizados como orientação para o escopo e desenvolvimento do trabalho.  
+8. Códigos, testes e arquivos `.mif` produzidos pelo próprio grupo durante o desenvolvimento do projeto.
